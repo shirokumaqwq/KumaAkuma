@@ -10,7 +10,7 @@ public class GlobalManager : MonoBehaviour
     public const int Maxrows = 10;
     public const int Maxcols = 10;
     public const int MaxStackNum = 7;
-    public const int MaxTileTypes = 5;
+    public const int MaxTileTypes = 6;
     public const float TileRadius = 0.5f;
 
     private float ScreenWidth;
@@ -67,7 +67,7 @@ public class GlobalManager : MonoBehaviour
         int tileNum = 0;
         for (int type = 0; type < MaxTileTypes; type++)
         {
-            int pairNum = Random.Range(0, 3);
+            int pairNum = Random.Range(1, 3);
             for (int j = 0; j < pairNum; j++)
             {
                 for (int k = 0; k < 3; k++)
@@ -178,6 +178,7 @@ public class GlobalManager : MonoBehaviour
                         }
                     }
                 }
+                Tile.GetComponent<Tile>().UpdateMaterial();
             }
         }
     }

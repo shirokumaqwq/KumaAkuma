@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 
 public class Tile : MonoBehaviour
 {
-    public const string MaterialFolderPath = "Materials/CubeMaterials/CubeMaterial";
+    public const string MaterialFolderPath = "Materials/TileMaterials/TileMaterial";
 
     public int Type = 0;
     public int Id = -1;
@@ -14,7 +15,7 @@ public class Tile : MonoBehaviour
     public Vector2Int OriginPos = new Vector2Int(0, 0);
 
 
-    public void SetMaterial()
+    public void GenerateMaterial()
     {
         if (Type == 0)
         {
@@ -22,24 +23,55 @@ public class Tile : MonoBehaviour
             return;
         }
 
-        string materialPath = MaterialFolderPath + Type;
-        Material material = Resources.Load<Material>(materialPath);
-
-        // 检查材质是否加载成功
-        if (material == null)
+        // 使用 Shaders/TileShader 创建材质
+        Shader shader = Shader.Find("Unlit/TileShader");
+        if (shader == null)
         {
-            Debug.LogWarning("Warning: Could not find material at " + materialPath);
+            Debug.LogWarning("Warning: Shader not found!");
             return;
         }
 
-        // 将材质赋给当前物体
+        Material material = new Material(shader);
+
+        // 设置材质的 _IsActive 属性
+        material.SetFloat("_IsActive", IsActive ? 1.0f : 0.0f);
+
+        // 动态加载纹理，假设材质纹理路径为 Materials/Textures/TileTexture + 对应的Type
+        string texturePath = "Materials/Textures/TileTexture" + Type;
+        Texture texture = Resources.Load<Texture>(texturePath);
+
+        if (texture == null)
+        {
+            Debug.LogWarning("Warning: Could not find texture at " + texturePath);
+            return;
+        }
+
+        // 将纹理设置到材质的 _MainTex 属性
+        material.SetTexture("_MainTex", texture);
+
+        // 将材质应用到当前物体的 Renderer 上
         GetComponent<Renderer>().material = material;
+    }
+
+
+    public void UpdateMaterial()
+    {
+        Renderer renderer = GetComponent<Renderer>();
+
+        // 确保材质使用的是正确的 Shader
+        if (renderer != null && renderer.material.shader.name == "Unlit/TileShader")
+        {
+            // 获取材质
+            Material _material = renderer.material;
+
+            _material.SetFloat("_IsActive", IsActive ? 1.0f : 0.0f);
+        }
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        SetMaterial();
+        GenerateMaterial();
     }
 
     // Update is called once per frame
