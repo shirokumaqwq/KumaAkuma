@@ -45,7 +45,7 @@ public class GlobalManager : MonoBehaviour
             tile = Instantiate(prefab);
             tile.name = "StandardBevelCube"; // Optionally, set the name of the instantiated object
             // 旋转 Cube 到指定角度
-            tile.transform.rotation = Quaternion.Euler(8f, 8f, 0f);
+            //tile.transform.rotation = Quaternion.Euler(8f, 8f, 0f);
 
             // 设置位置为传入的 Position
             tile.transform.position = position;

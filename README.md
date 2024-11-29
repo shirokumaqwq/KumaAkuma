@@ -2,6 +2,16 @@
 
 摸个三消小游戏玩( •̀ ω •́ )✧
 
+## TODO
+1. 移动动画
+2. 加道具
+3. 音效
+4. 消除特效
+5. 画贴图
+6. 通关界面/关卡切换界面
+7. 关卡模板
+   
+
 ## Prerequisites
 
 Before getting started, make sure you have the following installed:
