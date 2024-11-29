@@ -10,7 +10,7 @@ public class GlobalManager : MonoBehaviour
     public const int Maxrows = 10;
     public const int Maxcols = 10;
     public const int MaxStackNum = 7;
-    public const int MaxTileTypes = 6;
+    public const int MaxTileTypes = 5;
     public const float TileRadius = 0.5f;
 
     private float ScreenWidth;
@@ -34,19 +34,19 @@ public class GlobalManager : MonoBehaviour
     // 创建 Tile 并返回
     public GameObject CreateTile(Vector3 position, int material, int id)
     {
-        // 创建一个 Plane 对象
-        GameObject tile = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        // 创建一个 Cube 对象
+        GameObject tile = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-        // 旋转 Plane 到指定角度 (270, 0, 0)
-        tile.transform.rotation = Quaternion.Euler(270f, 0f, 0f);
+        // 旋转 Cube 到指定角度 (270, 0, 0)
+        tile.transform.rotation = Quaternion.Euler(8f, 8f, 0f);
 
         // 设置位置为传入的 Position
         tile.transform.position = position;
 
         // 设置缩放为 (0.1, 0.1, 0.1)
-        tile.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+        //tile.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 
-        // 为 Plane 添加 Tile.cs 脚本
+        // 为 Cube 添加 Tile.cs 脚本
         Tile tileScript = tile.AddComponent<Tile>();
 
         // 设置 TileType 为传入的 material 值
@@ -178,7 +178,6 @@ public class GlobalManager : MonoBehaviour
                         }
                     }
                 }
-                Tile.GetComponent<Tile>().UpdateMaterial();
             }
         }
     }

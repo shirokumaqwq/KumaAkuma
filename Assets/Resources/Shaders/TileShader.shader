@@ -1,9 +1,8 @@
-Shader "Unlit/TileShader"
+Shader "Unlit/TileShader 1"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _IsActive ("Is Active", Range(0, 1)) = 1.0 // 0 = Dark mode, 1 = Normal mode
     }
     SubShader
     {
@@ -15,6 +14,7 @@ Shader "Unlit/TileShader"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            // make fog work
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
@@ -32,10 +32,8 @@ Shader "Unlit/TileShader"
                 float4 vertex : SV_POSITION;
             };
 
-            // Texture and the active flag
             sampler2D _MainTex;
             float4 _MainTex_ST;
-            float _IsActive; // Variable to control active state (0 for dark mode, 1 for normal mode)
 
             v2f vert (appdata v)
             {
@@ -48,19 +46,10 @@ Shader "Unlit/TileShader"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // Sample the texture
+                // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv);
-                
-                // Check the IsActive flag
-                if (_IsActive == 0)
-                {
-                    // Dark mode: Reduce brightness to 50%
-                    col.rgb *= 0.5;
-                }
-                
-                // Apply fog
+                // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
-                
                 return col;
             }
             ENDCG
