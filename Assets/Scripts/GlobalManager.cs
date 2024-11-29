@@ -178,6 +178,7 @@ public class GlobalManager : MonoBehaviour
                         }
                     }
                 }
+                Tile.GetComponent<Tile>().UpdateMaterial();
             }
         }
     }
