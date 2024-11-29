@@ -37,7 +37,8 @@ public class Tile : MonoBehaviour
         material.SetFloat("_IsActive", IsActive ? 1.0f : 0.0f);
 
         // 动态加载纹理，假设材质纹理路径为 Materials/Textures/TileTexture + 对应的Type
-        string texturePath = "Materials/Textures/TileTexture" + Type;
+        // string texturePath = "Materials/Textures/TileTexture" + Type;
+        string texturePath = "Materials/Textures/CubeNum" + Type;
         Texture texture = Resources.Load<Texture>(texturePath);
 
         if (texture == null)

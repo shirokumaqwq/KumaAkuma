@@ -10,7 +10,7 @@ public class GlobalManager : MonoBehaviour
     public const int Maxrows = 10;
     public const int Maxcols = 10;
     public const int MaxStackNum = 7;
-    public const int MaxTileTypes = 5;
+    public const int MaxTileTypes = 8;
     public const float TileRadius = 0.5f;
 
     private float ScreenWidth;
@@ -34,31 +34,43 @@ public class GlobalManager : MonoBehaviour
     // 创建 Tile 并返回
     public GameObject CreateTile(Vector3 position, int material, int id)
     {
-        // 创建一个 Cube 对象
-        GameObject tile = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        GameObject tile;
+        // Load the prefab from the Resources folder
+        GameObject prefab = Resources.Load<GameObject>("Models/StandardBevelCube");
 
-        // 旋转 Cube 到指定角度 (270, 0, 0)
-        tile.transform.rotation = Quaternion.Euler(8f, 8f, 0f);
+        // Check if the prefab was successfully loaded
+        if (prefab != null)
+        {
+            // Instantiate the prefab in the scene
+            tile = Instantiate(prefab);
+            tile.name = "StandardBevelCube"; // Optionally, set the name of the instantiated object
+            // 旋转 Cube 到指定角度
+            tile.transform.rotation = Quaternion.Euler(8f, 8f, 0f);
 
-        // 设置位置为传入的 Position
-        tile.transform.position = position;
+            // 设置位置为传入的 Position
+            tile.transform.position = position;
 
-        // 设置缩放为 (0.1, 0.1, 0.1)
-        //tile.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 
-        // 为 Cube 添加 Tile.cs 脚本
-        Tile tileScript = tile.AddComponent<Tile>();
+            // 为 Cube 添加 Tile.cs 脚本
+            Tile tileScript = tile.AddComponent<Tile>();
 
-        // 设置 TileType 为传入的 material 值
-        tileScript.Type = material;
-        tileScript.Id = id;
+            // 设置 TileType 为传入的 material 值
+            tileScript.Type = material;
+            tileScript.Id = id;
 
-        // 你可以根据需求初始化其他属性，默认值会保留
-        // tileScript.IsExist = true;  // 默认是 true
-        // tileScript.IsActive = true; // 默认是 true
+            // 你可以根据需求初始化其他属性，默认值会保留
+            // tileScript.IsExist = true;  // 默认是 true
+            // tileScript.IsActive = true; // 默认是 true
 
-        // 返回这个创建的 GameObject
-        return tile;
+            // 返回这个创建的 GameObject
+            return tile;
+        }
+        else
+        {
+            Debug.LogError("Prefab not found at Assets/Resources/Models/StandardBevelCube.prefab");
+            return null;
+        }
+
     }
 
     void GenerateTileLists(int level = 1)
