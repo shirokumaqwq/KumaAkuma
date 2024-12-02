@@ -12,6 +12,7 @@ public class GlobalManager : MonoBehaviour
     public const int MaxStackNum = 7;
     public const int MaxTileTypes = 5;
     public const float TileRadius = 0.5f;
+    public const float TileMoveTime = .1f;
 
     private float ScreenWidth;
     private float ScreenHeight;
@@ -23,6 +24,7 @@ public class GlobalManager : MonoBehaviour
 
     public List<GameObject> TileList = new List<GameObject>();
     public LinkedList<GameObject> TileStack = new LinkedList<GameObject>();
+    
     private int ExistNum = 0;
     private bool isGameRunning = true;
 
@@ -61,6 +63,7 @@ public class GlobalManager : MonoBehaviour
             // 设置 TileType 为传入的 material 值
             tileScript.Type = material;
             tileScript.Id = id;
+            tileScript.targetPosition = position;
 
             // 你可以根据需求初始化其他属性，默认值会保留
             // tileScript.IsExist = true;  // 默认是 true
@@ -206,59 +209,101 @@ public class GlobalManager : MonoBehaviour
         LinkedListNode<GameObject> TileNode = TileStack.First;
         while (TileNode != null)
         {
-            TileNode.Value.transform.position = Pos;
+            //TileNode.Value.transform.position = Pos;
+            TileNode.Value.GetComponent<Tile>().MoveTileTo(Pos);
             Pos += new Vector3(1.0f, 0, 0);
             TileNode = TileNode.Next;
         }
     }
 
+    int ComputeValidStackNum()
+    {
+        LinkedListNode<GameObject> TileNode = TileStack.First;
+        int Num = 0;
+        while (TileNode != null)
+        {
+            if (!TileNode.Value.GetComponent<Tile>().Wait2Eliminate)
+                Num++;
+            TileNode = TileNode.Next;
+        }
+        return Num;
+    }
 
     int UpdateStack(GameObject NewTile)
     {
         NewTile.GetComponent<Tile>().IsActive = false;
         NewTile.GetComponent<Tile>().IsExistInView = false;
+        NewTile.GetComponent<Tile>().IsMove = true;
         ExistNum--;
 
         int NewType = NewTile.GetComponent<Tile>().Type;
         int NewTypeCount = 1;
         LinkedListNode<GameObject> TileNode = TileStack.First;
-        bool HasInserted = false;
+        LinkedListNode<GameObject> InsertPoistion = TileStack.Last;
+
         while (TileNode != null)
         {
             int NodeType = TileNode.Value.GetComponent<Tile>().Type;
             if (NodeType == NewType)
             {
                 NewTypeCount++;
-                if(HasInserted == false)
-                {
-                    LinkedListNode<GameObject> NewNode = new LinkedListNode<GameObject>(NewTile);
-                    TileStack.AddAfter(TileNode, NewNode);
-                    TileNode = TileNode.Next;
-                    HasInserted = true;
-                }
+                InsertPoistion = TileNode;
             }
             TileNode = TileNode.Next;  
         }
 
-        if(HasInserted == false)
-        {
-            TileStack.AddLast(NewTile);
-            HasInserted = true;
-        }
+        LinkedListNode<GameObject> NewNode = new LinkedListNode<GameObject>(NewTile);
+        if (InsertPoistion != null)
+            TileStack.AddAfter(InsertPoistion, NewNode);
+        else
+            TileStack.AddLast(NewNode);
 
-        // 三消
+        // 三消状态设置
         if (NewTypeCount == 3)
         {
             TileNode = TileStack.First;
             while (TileNode != null)
             {
-                int NodeType = TileNode.Value.GetComponent<Tile>().Type;
-                if(NodeType == NewType)
+                Tile TileComponent = TileNode.Value.GetComponent<Tile>();
+                int NodeType = TileComponent.Type;
+                if (NodeType == NewType)
+                {
+                    TileComponent.Wait2Eliminate = true;
+                }
+                TileNode = TileNode.Next;
+            }
+        }
+
+        UpdateStackPosition();
+
+        return 0;
+    }
+
+
+    void UpdateForEliminate()
+    {
+        // 如果移动完成则消除
+        LinkedListNode<GameObject> TileNode = TileStack.First;
+        bool MoveState = false;
+        while (TileNode != null)
+        {
+            if (TileNode.Value.GetComponent<Tile>().Wait2Eliminate)
+            {
+                MoveState |= TileNode.Value.GetComponent<Tile>().IsMove;
+            }
+            TileNode = TileNode.Next;
+        }
+
+        if (!MoveState)
+        {
+            TileNode = TileStack.First;
+            while (TileNode != null)
+            {
+                if (TileNode.Value.GetComponent<Tile>().Wait2Eliminate)
                 {
                     LinkedListNode<GameObject> nodeToRemove = TileNode;
                     TileNode = TileNode.Next;
                     nodeToRemove.Value.SetActive(false);
-
                     TileStack.Remove(nodeToRemove);
                 }
                 else
@@ -269,23 +314,23 @@ public class GlobalManager : MonoBehaviour
         }
 
         UpdateStackPosition();
+    }
 
+    void IsGameOver()
+    {
         // 判断是否满
-        if (TileStack.Count == MaxStackNum)
+        if (ComputeValidStackNum() >= MaxStackNum)
         {
             Debug.Log("游戏失败");
             gameEndManager.EndGame(false);
-            isGameRunning = false; 
-            return -1;
+            isGameRunning = false;
         }
 
-        if(ExistNum == 0) 
+        if (ExistNum == 0 && TileStack.Count == 0)
         {
             gameEndManager.EndGame(true);
             Debug.Log("游戏成功");
         }
-
-        return 0;
     }
 
     // Start is called before the first frame update
@@ -322,5 +367,8 @@ public class GlobalManager : MonoBehaviour
             }
         }
 
+        UpdateForEliminate();
+        
+        IsGameOver();
     }
 }

@@ -1,18 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.Rendering.DebugUI;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 
 public class Tile : MonoBehaviour
 {
     public const string MaterialFolderPath = "Materials/TileMaterials/TileMaterial";
+    private const float MinVelocity = 1.0f;
 
-    public int Type = 0;
+    public int Type = 0; //花色
     public int Id = -1;
-    public bool IsExistInView = true;
-    public bool IsActive = true;
+    public bool IsExistInView = true; // 是否还存在
+    public bool IsActive = true; //是否被遮挡
     public Vector2Int OriginPos = new Vector2Int(0, 0);
+    public bool IsMove = false;
+    public bool Wait2Eliminate = false;
+
+    public Vector3 targetPosition;
 
 
     public void GenerateMaterial()
@@ -69,6 +76,11 @@ public class Tile : MonoBehaviour
         }
     }
 
+    public void MoveTileTo(Vector3 targetPosition)
+    {
+        this.targetPosition = targetPosition;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -78,6 +90,19 @@ public class Tile : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        if (Vector3.Distance(transform.position, targetPosition) > 0.01f)
+        {
+            Vector3 velocity = (targetPosition - transform.position) / GlobalManager.TileMoveTime;
+            velocity = velocity.magnitude > 1.0f ? velocity : (velocity.normalized * MinVelocity);
+            transform.position += velocity * Time.deltaTime;           
+            IsMove = true;
+        }
+        else //到达目的地
+        {
+            transform.position = targetPosition;
+            IsMove = false;
+        }
 
     }
 
