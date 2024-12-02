@@ -10,7 +10,7 @@ public class GlobalManager : MonoBehaviour
     public const int Maxrows = 10;
     public const int Maxcols = 10;
     public const int MaxStackNum = 7;
-    public const int MaxTileTypes = 8;
+    public const int MaxTileTypes = 5;
     public const float TileRadius = 0.5f;
 
     private float ScreenWidth;
@@ -18,10 +18,14 @@ public class GlobalManager : MonoBehaviour
 
 
     public Camera mainCamera; // 主相机
+    public GameEndManager gameEndManager;
+
 
     public List<GameObject> TileList = new List<GameObject>();
     public LinkedList<GameObject> TileStack = new LinkedList<GameObject>();
     private int ExistNum = 0;
+    private bool isGameRunning = true;
+
 
 
     public Vector2 FindPos(int row, int col)
@@ -270,11 +274,14 @@ public class GlobalManager : MonoBehaviour
         if (TileStack.Count == MaxStackNum)
         {
             Debug.Log("游戏失败");
+            gameEndManager.EndGame(false);
+            isGameRunning = false; 
             return -1;
         }
 
         if(ExistNum == 0) 
         {
+            gameEndManager.EndGame(true);
             Debug.Log("游戏成功");
         }
 
@@ -297,6 +304,8 @@ public class GlobalManager : MonoBehaviour
     void Update()
     {
 
+        if (!isGameRunning)
+            return;
 
         if (Input.GetMouseButtonDown(0)) // 判断是否是鼠标左键点击 
         {
