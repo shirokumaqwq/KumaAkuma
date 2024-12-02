@@ -9,17 +9,17 @@ using static UnityEngine.RuleTile.TilingRuleOutput;
 public class Tile : MonoBehaviour
 {
     public const string MaterialFolderPath = "Materials/TileMaterials/TileMaterial";
-    private const float MinVelocity = 1.0f;
+    private const float MinVelocity = 3.0f;
 
     public int Type = 0; //花色
     public int Id = -1;
     public bool IsExistInView = true; // 是否还存在
     public bool IsActive = true; //是否被遮挡
-    public Vector2Int OriginPos = new Vector2Int(0, 0);
     public bool IsMove = false;
     public bool Wait2Eliminate = false;
 
     public Vector3 targetPosition;
+    public Vector3 OriginalPosition;
 
 
     public void GenerateMaterial()
@@ -91,18 +91,28 @@ public class Tile : MonoBehaviour
     void Update()
     {
 
-        if (Vector3.Distance(transform.position, targetPosition) > 0.01f)
+        if (Vector3.Distance(transform.position, targetPosition) > 0.001f)
         {
             Vector3 velocity = (targetPosition - transform.position) / GlobalManager.TileMoveTime;
             velocity = velocity.magnitude > 1.0f ? velocity : (velocity.normalized * MinVelocity);
-            transform.position += velocity * Time.deltaTime;           
-            IsMove = true;
+
+            if(Vector3.Dot(targetPosition - OriginalPosition, velocity) < 0 )
+            {
+                transform.position = targetPosition;
+                IsMove = false;
+            }
+            else
+            {
+                transform.position += velocity * Time.deltaTime;           
+                IsMove = true;
+            }
         }
         else //到达目的地
         {
             transform.position = targetPosition;
             IsMove = false;
         }
+
 
     }
 

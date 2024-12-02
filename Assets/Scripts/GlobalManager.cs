@@ -10,7 +10,7 @@ public class GlobalManager : MonoBehaviour
     public const int Maxrows = 10;
     public const int Maxcols = 10;
     public const int MaxStackNum = 7;
-    public const int MaxTileTypes = 5;
+    public const int MaxTileTypes = 8;
     public const float TileRadius = 0.5f;
     public const float TileMoveTime = .1f;
 
@@ -64,6 +64,7 @@ public class GlobalManager : MonoBehaviour
             tileScript.Type = material;
             tileScript.Id = id;
             tileScript.targetPosition = position;
+            tileScript.OriginalPosition = position;
 
             // 你可以根据需求初始化其他属性，默认值会保留
             // tileScript.IsExist = true;  // 默认是 true
@@ -86,7 +87,7 @@ public class GlobalManager : MonoBehaviour
         int tileNum = 0;
         for (int type = 0; type < MaxTileTypes; type++)
         {
-            int pairNum = Random.Range(1, 3);
+            int pairNum = Random.Range(1, 5);
             for (int j = 0; j < pairNum; j++)
             {
                 for (int k = 0; k < 3; k++)
@@ -119,7 +120,7 @@ public class GlobalManager : MonoBehaviour
         if (mainCamera.orthographic)
         {
             // 设置正交相机的视野大小：根据屏幕的宽高比调整
-            mainCamera.orthographicSize = (screenAspect < 1) ? 5 / screenAspect : 5;
+            mainCamera.orthographicSize = (screenAspect < 1) ? 4.5f / screenAspect : 4.5f;
 
             // 计算视野框的宽度和高度
             ScreenWidth = mainCamera.orthographicSize * 2 * screenAspect;
@@ -205,7 +206,7 @@ public class GlobalManager : MonoBehaviour
     void UpdateStackPosition()
     {
         int StackTileNum = TileStack.Count;
-        Vector3 Pos = new Vector3((ScreenWidth - 7) / 2.0f, 0.5f, 0);
+        Vector3 Pos = new Vector3((ScreenWidth - 7) / 2.0f + 0.5f, 0.5f, 0);
         LinkedListNode<GameObject> TileNode = TileStack.First;
         while (TileNode != null)
         {
