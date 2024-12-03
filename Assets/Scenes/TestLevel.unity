@@ -1028,6 +1028,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7016d81b7ec954e41b6d57d3f7a666cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Level: 0
+  MaxTileTypes: 8
   mainCamera: {fileID: 0}
   gameEndManager: {fileID: 1094837980}
   TileList: []

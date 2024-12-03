@@ -10,13 +10,14 @@ public class GlobalManager : MonoBehaviour
     public const int Maxrows = 10;
     public const int Maxcols = 10;
     public const int MaxStackNum = 7;
-    public const int MaxTileTypes = 8;
     public const float TileRadius = 0.5f;
     public const float TileMoveTime = .1f;
 
     private float ScreenWidth;
     private float ScreenHeight;
 
+    public int Level = 0;
+    public int MaxTileTypes = 8;
 
     public Camera mainCamera; // 主相机
     public GameEndManager gameEndManager;
@@ -81,29 +82,66 @@ public class GlobalManager : MonoBehaviour
 
     }
 
-    void GenerateTileLists(int level = 1)
-    {
-        // TODO: level template?
-        int tileNum = 0;
-        for (int type = 0; type < MaxTileTypes; type++)
-        {
-            int pairNum = Random.Range(1, 5);
-            for (int j = 0; j < pairNum; j++)
-            {
-                for (int k = 0; k < 3; k++)
-                {
-                    Vector3 randomPosition = new Vector3(
-                        Random.Range(0 + 1.0f, ScreenWidth - 1.0f),   // x 范围：0 到 Screen.width
-                        Random.Range(2.0f, ScreenHeight - 1.0f),  // y 范围：0 到 Screen.height
-                        Random.Range(0f, 10f)            // z 范围：0 到 10
-                    );
-                    GameObject NewTile = CreateTile(randomPosition, type + 1, tileNum);
-                    TileList.Add(NewTile);
-                    tileNum++;
-                }
 
+    void GenerateTileLists(int level = 0)
+    {
+        if (level == 0) // Random generate
+        {
+            int tileNum = 0;
+            for (int type = 0; type < MaxTileTypes; type++)
+            {
+                int pairNum = Random.Range(1, 5);
+                for (int j = 0; j < pairNum; j++)
+                {
+                    for (int k = 0; k < 3; k++)
+                    {
+                        Vector3 randomPosition = new Vector3(
+                            Random.Range(0 + 1.0f, ScreenWidth - 1.0f),   // x 范围：0 到 Screen.width
+                            Random.Range(2.0f, ScreenHeight - 1.0f),  // y 范围：0 到 Screen.height
+                            Random.Range(0f, 10f)            // z 范围：0 到 10
+                        );
+                        GameObject NewTile = CreateTile(randomPosition, type + 1, tileNum);
+                        TileList.Add(NewTile);
+                        tileNum++;
+                    }
+
+                }
             }
         }
+        else
+        {
+            // Search for all GameObjects in the scene
+            GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
+            List<GameObject> TilePrefabs = new List<GameObject>();
+
+            // Loop through each object and check if the name contains "StandardBevelCube"
+            foreach (GameObject obj in allObjects)
+            {
+                if (obj.name.Contains("StandardBevelCube"))
+                {
+                    TilePrefabs.Add(obj);
+                }
+            }
+
+            int TileNum = TilePrefabs.Count;
+            if (TileNum % 3 != 0)
+                Debug.LogError("Tile Num should be diveded by 3!");
+
+            int type = 0;
+            for (int i = 0; i < TileNum / 3; i++)
+            {
+                for (int j = 0;j<3;j++)
+                {
+                    int Rnd = Random.Range(0, TilePrefabs.Count);
+                    GameObject NewTile = CreateTile(TilePrefabs[Rnd].transform.position, type + 1, 3 * i + j);
+                    TileList.Add(NewTile);
+                    TilePrefabs[Rnd].SetActive(false);
+                    TilePrefabs.RemoveAt(Rnd);
+                }
+                type = (type + 1) % MaxTileTypes;
+            }
+        }
+
 
         ExistNum = TileList.Count;
         UpdateActiveState();
@@ -322,7 +360,7 @@ public class GlobalManager : MonoBehaviour
         // 判断是否满
         if (ComputeValidStackNum() >= MaxStackNum)
         {
-            Debug.Log("游戏失败");
+            // Debug.Log("游戏失败");
             gameEndManager.EndGame(false);
             isGameRunning = false;
         }
@@ -330,7 +368,7 @@ public class GlobalManager : MonoBehaviour
         if (ExistNum == 0 && TileStack.Count == 0)
         {
             gameEndManager.EndGame(true);
-            Debug.Log("游戏成功");
+            // Debug.Log("游戏成功");
         }
     }
 
@@ -343,7 +381,7 @@ public class GlobalManager : MonoBehaviour
 
         //CreateTile(new Vector3(1, 1, 0), 2);
 
-        GenerateTileLists();
+        GenerateTileLists(Level);
     }
 
     // Update is called once per frame

@@ -43,6 +43,7 @@ public class GameEndManager : MonoBehaviour
     public void RestartGame()
     {
         // 加载当前场景，重新开始
+        Debug.Log("Restart");
         SceneManager.LoadScene("MainMenu");
     }
 
